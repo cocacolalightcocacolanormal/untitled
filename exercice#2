@@ -4,59 +4,117 @@ import random
 SCREEN_WIDTH = 800
 SCREEN_HEIGHT = 600
 
-COLORS = [arcade.color.BLUE, arcade.color.FANDANGO_PINK,
-         arcade.color.FRENCH_ROSE, arcade.color.GOLDEN_POPPY]
+# On liste les couleurs de la librairie arcade
+COLORS = [arcade.color.RED, arcade.color.ORANGE, arcade.color.YELLOW, arcade.color.GREEN, arcade.color.BLUE, arcade.color.PURPLE, arcade.color.PINK]
 
-class Cercle():
-   def __init__(self, rayon, centre_x, centre_y, color):
-       self.rayon = rayon
-       self.centre_x = centre_x
-       self.centre_y = centre_y
-       self.color = color
 
-   def draw(self):
-       arcade.draw_circle_filled(self.centre_x, self.centre_y, self.rayon, self.color)
+class Balle:
+    def __init__(self, x, y, change_x, change_y, rayon, color):
+        self.x = x
+        self.y = y
+        self.change_x = change_x
+        self.change_y = change_y
+        self.rayon = rayon
+        self.color = color
 
+    def update(self):
+        # On change la position de la balle
+        self.x += self.change_x
+        self.y += self.change_y
+
+        #Ici, on s'assure que la bolle ne sort pas de l'écran
+        if self.x < self.rayon:
+            self.x = self.rayon
+            self.change_x *= -1
+        elif self.x > SCREEN_WIDTH - self.rayon:
+            self.x = SCREEN_WIDTH - self.rayon
+            self.change_x *= -1
+        if self.y < self.rayon:
+            self.y = self.rayon
+            self.change_y *= -1
+        elif self.y > SCREEN_HEIGHT - self.rayon:
+            self.y = SCREEN_HEIGHT - self.rayon
+            self.change_y *= -1
+
+    def draw(self):
+        # On dessine la balle sur l´écran
+        arcade.draw_circle_filled(self.x, self.y, self.rayon, self.color)
+
+
+class Rectangle:
+    def __init__(self, x, y, change_x, change_y, width, height, color, angle):
+        self.x = x
+        self.y = y
+        self.change_x = change_x
+        self.change_y = change_y
+        self.width = width
+        self.height = height
+        self.color = color
+        self.angle = angle
+
+    def update(self):
+        # On change la position du rectangle
+        self.x += self.change_x
+        self.y += self.change_y
+
+        # Ici, on s´assure que le rectangle ne sort pas de l´écran
+        if self.x < 0:
+            self.x = 0
+            self.change_x *= -1
+        elif self.x > SCREEN_WIDTH - self.width:
+            self.x = SCREEN_WIDTH - self.width
+            self.change_x *= -1
+        if self.y < 0:
+            self.y = 0
+            self.change_y *= -1
+        elif self.y > SCREEN_HEIGHT - self.height:
+            self.y = SCREEN_HEIGHT - self.height
+            self.change_y *= -1
+
+    def draw(self):
+        # On dessine le rectangle sur l´écran
+        arcade.draw_rectangle_filled(self.x, self.y, self.width, self.height, self.color, self.angle)
 
 
 class MyGame(arcade.Window):
-   def __init__(self):
-       super().__init__(SCREEN_WIDTH, SCREEN_HEIGHT, "Exercice #1")
-       self.liste_cercles = []
+    def __init__(self):
+        super().__init__(SCREEN_WIDTH, SCREEN_HEIGHT, "Exercice #1")
+        self.liste_balles = []
+        self.liste_rectangles = []
+#On fait apparaitre le cercle et le rectangle sur l'écran quand les bouttons qui y sont attribués sont appuyés
+    def on_mouse_press(self, x: int, y: int, button: int, modifiers: int):
 
-   def setup(self):
-       for _ in range(20):
-           rayon = random.randint(10, 50)
-           center_x = random.randint(0 + rayon, SCREEN_WIDTH - rayon)
-           center_y = random.randint(0 + rayon, SCREEN_HEIGHT - rayon)
-           color = random.choice(COLORS)
-           cercle = Cercle(rayon, center_x, center_y, color)
-           self.liste_cercles.append(cercle)
-
-   def on_draw(self):0
-       arcade.start_render()
-
-       for cercle in self.liste_cercles:
-           cercle.draw()
-
-   def on_mouse_press(self, x: int, y: int, button: int, modifiers: int):
-       for cercle in self.liste_cercles:
-           if button == arcade.MOUSE_BUTTON_LEFT and x > cercle.centre_x - cercle.rayon and x < cercle.centre_x + cercle.rayon and y > cercle.centre_y - cercle.rayon and y < cercle.centre_y + cercle.rayon:
-               self.liste_cercles.remove(cercle)
-               
-            
-            if button == arcade.MOUSE_BUTTON_RIGHT and x > cercle.centre_x - cercle.rayon and x < cercle.centre_x + cercle.rayon and y > cercle.centre_y - cercle.rayon and y < cercle.centre_y + cercle.rayon:
-                self.liste_cercles.remove(cercle)
-               
-               
-               
-               
-
-def main():
-   my_game = MyGame()
-   my_game.setup()
-
-   arcade.run()
+        if button == arcade.MOUSE_BUTTON_LEFT:
+            self.liste_balles.append(Balle(x,y,2,2,30,random.choice(COLORS)))
 
 
-main()
+
+        if button == arcade.MOUSE_BUTTON_RIGHT:
+            self.liste_rectangles.append(Rectangle(x,y,2,2,50,60,random.choice(COLORS),90))
+
+
+
+#on change la position des figures sur l'écran pour qu'elles bougent
+    def on_update(self, delta_time: float):
+        for balle in self.liste_balles:
+            balle.update()
+
+        for rectangle in self.liste_rectangles:
+            rectangle.update()
+
+
+
+
+    def setup(self):
+        pass
+#On dessine les figures sur l'écran
+    def on_draw(self):
+        arcade.start_render()
+        for balle in self.liste_balles:
+            balle.draw()
+
+        for rectangle in self.liste_rectangles:
+            rectangle.draw()
+
+window = MyGame()
+arcade.run()
